@@ -5,14 +5,14 @@ import numpy as np
 
 def normalize(matrix):
     '''Normalizing the matrix.'''
-    matrix_sum = matrix.sum(1)
+    matrix_sum = matrix.sum(0)
     for i in range(len(matrix_sum)):
-        matrix[i] = 1.0*matrix[i]/matrix_sum[i]
+        matrix[:,i] = 1.0*matrix[:,i]/matrix_sum[i]
 
 class CLinkAnalysis:
     def __init__(self):
         ''''''
-        self.gamma = 0.9
+        self.gamma = 0.7
         self.eta = 1.0
         self.A = None
         self.B = None
@@ -44,7 +44,7 @@ class CLinkAnalysis:
             temp = np.sum(self.A[i,:])
             for j in range(self.A.shape[1]):
                 self.B[i,j] = float(self.A[i,j])/(temp**self.gamma)
-        self.CR0 = np.eye(N=self.A.shape[0], M=self.A.shape[1])*self.eta
+        self.CR0 = np.eye(N=self.A.shape[0], M=self.A.shape[0])*self.eta
         self.CR = self.CR0
 
 
@@ -53,8 +53,9 @@ class CLinkAnalysis:
         Calculating the parameters.
         '''
         for t in range(MAXIteration):
-            self.PR = self.calPR()
-            self.CR = self.calCR()
+            self.calPR()
+            self.calCR()
+
 
     def calSubRecommend(self, Data, active_id):
         '''
@@ -75,21 +76,14 @@ class CLinkAnalysis:
         self.initParameters(Data)
         self.calParameters(MAXIteration)
         recommendation = {}
-        for i in range(Data.shape[0]):
+        for i in range(self.A.shape[0]):
             temp = self.calSubRecommend(Data, i)
             temp = sorted(temp.iteritems(), key=lambda x:x[1], reverse=True)
             recommendation[i] = [item_id for item_id, sim in temp[:top_num]]
         return recommendation
-
-
 
 if __name__=='__main__':
     from CommonModules import loadData
     data = loadData()
     mCUserBasedCF = CLinkAnalysis()
     recommendation = mCUserBasedCF.calRecommend(data, 3, 1)
-    print recommendation
-    print '*'*100
-    print mCUserBasedCF.PR
-    print '*'*100
-    print mCUserBasedCF.CR
