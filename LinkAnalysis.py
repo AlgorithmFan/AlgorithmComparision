@@ -55,6 +55,9 @@ class CLinkAnalysis:
         for t in range(MAXIteration):
             self.calPR()
             self.calCR()
+            print '*'*100
+            print self.PR
+            print self.CR
 
 
     def calSubRecommend(self, Data, active_id):
